@@ -1,6 +1,6 @@
 "use client";
 
-// import { resendOtp } from "@/actions/user_actions";
+import { resendOtp } from "@/actions/user_actions";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -14,15 +14,16 @@ const ResendOtpButton = () => {
   const resendOTPHandler = async () => {
     setIsResendingOTP(true);
 
-    const email = localStorage.getItem("email");
+    const email = localStorage.getItem("email")
+    
 
     try {
-      // const data = await resendOtp(email!);
-      // if (data.success) {
-      //   toast.success(data.message);
-      // } else {
-      //   toast.error(data.message);
-      // }
+      const data = await resendOtp(email!);
+      if (data.success) {
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
       setTimeLeft(30);
     } catch (error: any) {
       toast.error("Error re-sending OTP", {

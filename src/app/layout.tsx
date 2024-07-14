@@ -6,6 +6,7 @@ import { Container } from "@/components";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import AuthProvider from "./AuthProvider";
 // import { getUser } from "@/actions/user_actions";
 
 const fontSans = FontSans({ subsets: ["latin"], variable: "--font-sans" });
@@ -32,10 +33,12 @@ export default async function RootLayout({
         <StoreProvider>
           <GoogleOAuthProvider
             clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
-            <Container className="py-3">
-              <main className="h-main-height">{children}</main>
-            </Container>
-            <Toaster richColors position="top-center" />
+            <AuthProvider>
+              <Container className="py-3">
+                <main className="h-main-height">{children}</main>
+              </Container>
+              <Toaster richColors position="top-center" />
+            </AuthProvider>
           </GoogleOAuthProvider>
         </StoreProvider>
       </body>

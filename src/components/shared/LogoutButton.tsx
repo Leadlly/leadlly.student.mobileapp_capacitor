@@ -8,7 +8,6 @@ import { toast } from "sonner";
 
 import { Button } from "../ui/button";
 
-import apiClient from "@/apiClient/apiClient";
 import { useAppDispatch } from "@/redux/hooks";
 import { userData } from "@/redux/slices/userSlice";
 
@@ -19,10 +18,18 @@ const LogoutButton = () => {
 
   const logoutHandler = async () => {
     try {
-      const res = await apiClient.get("/api/auth/logout");
-      toast.success(res.data?.message);
-      dispatch(userData(null));
+      const response = await fetch("/api/auth/logout", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      const responseData = await response.json();
+      toast.success(responseData.message);
       router.push("/login");
+      dispatch(userData(null));
     } catch (error: any) {
       toast.error("Logout Failed!", {
         description: error?.message,
@@ -32,10 +39,10 @@ const LogoutButton = () => {
   return (
     <Button
       onClick={logoutHandler}
-      variant={"ghost"}
-      className="mt-auto w-full justify-start gap-3 text-primary rounded-full xl:rounded-xl text-base md:text-[20px] hover:text-white hover:bg-primary py-3">
-      <LogOut className="w-4 h-4 md:w-5 md:h-5" />
-      <span className="hidden xl:block">Logout</span>
+      variant={"outline"}
+      className="w-full h-11 items-center gap-2 text-primary hover:text-primary hover:bg-primary/10 border-primary rounded-full xl:rounded-xl text-base md:text-lg font-normal py-3 px-2 md:px-4">
+      <LogOut className="w-4 h-4" />
+      <span>Logout</span>
     </Button>
   );
 };
