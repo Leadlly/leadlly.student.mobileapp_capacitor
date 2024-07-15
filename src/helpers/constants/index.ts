@@ -1,4 +1,4 @@
-import { TQuizQuestionProps, TSidebarLink, TWeeklyPlanProps } from "../types";
+import { TSidebarLink } from "../types";
 
 import DashboardIcon from "@/components/icons/DashboardIcon";
 import PlannerIcon from "@/components/icons/PlannerIcon";
@@ -64,103 +64,51 @@ export const userSidebarLinks: TSidebarLink[] = [
   },
 ];
 
-export const quizQuestions: TQuizQuestionProps[] = [
+export const moodEmojis = [
   {
-    question: "Sample question 1",
-    options: {
-      all: ["1", "2", "3", "4"],
-      correct: ["2"],
-    },
+    moodImg: "/assets/icons/sad_emoji.png",
+    mood_id: "sad-emoji",
+    mood: "sad",
   },
   {
-    question: "Sample question 2",
-    options: {
-      all: ["1", "2", "3", "4"],
-      correct: ["1"],
-    },
+    moodImg: "/assets/icons/unhappy_emoji.png",
+    mood_id: "unhappy-emoji",
+    mood: "unhappy",
   },
   {
-    question: "Sample question 3",
-    options: {
-      all: ["1", "2", "3", "4"],
-      correct: ["4"],
-    },
+    moodImg: "/assets/icons/neutral_emoji.png",
+    mood_id: "neutral-emoji",
+    mood: "neutral",
   },
   {
-    question: "Sample question 4",
-    options: {
-      all: ["1", "2", "3", "4"],
-      correct: ["3"],
-    },
+    moodImg: "/assets/icons/smiling_emoji.png",
+    mood: "smiling",
+    mood_id: "smiling-emoji",
   },
   {
-    question: "Sample question 5",
-    options: {
-      all: ["1", "2", "3", "4"],
-      correct: ["4"],
-    },
+    moodImg: "/assets/icons/laughing_emoji.png",
+    mood_id: "laughing-emoji",
+    mood: "laughing",
   },
 ];
 
-export const weeklyPlan: TWeeklyPlanProps[] = [
+export const manageAccountTabs = [
   {
-    date: new Date("2024-05-09T00:00:00Z"),
-    topics: "Limits, continuity, and differentiability / Magnetism",
+    id: "personal-info",
+    label: "Personal Info",
   },
   {
-    date: new Date("2024-05-10T00:00:00Z"),
-    topics: "Vector Algebra/Work and Energy / Atomic Structure",
+    id: "study-progress",
+    label: "Study Progress",
   },
-  {
-    date: new Date("2024-05-11T00:00:00Z"),
-    topics: "Permutations Combinations / Hydrocarbons",
-  },
-  {
-    date: new Date("2024-05-12T00:00:00Z"),
-    topics: "Sequence Series / Oxygen, Halogens, and Nitrogen",
-  },
-  {
-    date: new Date("2024-05-13T00:00:00Z"),
-    topics: "Differential Equations / Alternating Currents",
-  },
-  {
-    date: new Date("2024-05-14T00:00:00Z"),
-    topics: "Coordinate Geometry / Work and Energy / Equilibrium and Chemical",
-  },
-  {
-    date: new Date("2024-05-15T00:00:00Z"),
-    topics: "Buffer Day",
-  },
-];
-
-export const trackerTabs = [
-  {
-    id: "maths",
-    subject: "maths",
-  },
-  {
-    id: "physics",
-    subject: "physics",
-  },
-  {
-    id: "chemistry",
-    subject: "chemistry",
-  },
-];
-
-export const userSubjects = [
-  {
-    id: "maths",
-    label: "Maths",
-  },
-  {
-    id: "physics",
-    label: "Physics",
-  },
-  {
-    id: "chemistry",
-    label: "Chemistry",
-  },
+  // {
+  //   id: "subject-overview",
+  //   label: "Subject Overview",
+  // },
+  // {
+  //   id: "your-mentor",
+  //   label: "Your Mentor",
+  // },
 ];
 
 export const subscriptionPlanningBenefits = [
@@ -195,5 +143,57 @@ export const subscriptionLearningBenefits = [
   },
   {
     label: "know your mistakes",
+  },
+];
+export interface EfficiencyOption {
+  min?: number;
+  max?: number;
+  label: string;
+  progressBarColor: string;
+  textColor: string;
+}
+export const SUBJECT_COLORS = {
+  Maths: "bg-[#107FFC30]",
+  Chemistry: "bg-[#72EFDD4A]",
+  Physics: "bg-[#A36AF53D]",
+};
+
+export const chatPageTabs = [
+  {
+    title: "chat",
+    id: "chat",
+    desktopView: true,
+  },
+  {
+    title: "meetings",
+    id: "meetings",
+    desktopView: true,
+  },
+  {
+    title: "request meeting",
+    id: "requestMeeting",
+    desktopView: false,
+  },
+];
+
+export const meetingTabs = [
+  {
+    id: "upcoming",
+    label: "upcoming",
+  },
+  {
+    id: "done",
+    label: "done",
+  },
+];
+
+export const quizPageTabs = [
+  {
+    title: "unattempted",
+    id: "unattempted",
+  },
+  {
+    title: "attempted",
+    id: "attempted",
   },
 ];

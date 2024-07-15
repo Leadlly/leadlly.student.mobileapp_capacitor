@@ -5,7 +5,6 @@ const config: CapacitorConfig = {
   appName: "Leadlly",
   webDir: "out",
   server: {
-    url: "http://192.168.1.3:3000",
     cleartext: true,
     androidScheme: "http",
     allowNavigation: ["localhost"],

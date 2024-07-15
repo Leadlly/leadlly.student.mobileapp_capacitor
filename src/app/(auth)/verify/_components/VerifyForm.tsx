@@ -27,6 +27,10 @@ import * as z from "zod";
 import { Loader2 } from "lucide-react";
 import ResendOtpButton from "./ResendOtpButton";
 import Image from "next/image";
+import { Preferences } from "@capacitor/preferences";
+import { verifyUser } from "@/actions/user_actions";
+import { useAppDispatch } from "@/redux/hooks";
+import { userData } from "@/redux/slices/userSlice";
 
 const OTPFormSchema = z.object({
   otp: z
@@ -38,6 +42,7 @@ const Verify = () => {
   const [isVerifying, setIsVerifying] = useState(false);
 
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const form = useForm<z.infer<typeof OTPFormSchema>>({
     resolver: zodResolver(OTPFormSchema),
@@ -46,30 +51,21 @@ const Verify = () => {
   const onOTPSubmit = async (data: z.infer<typeof OTPFormSchema>) => {
     setIsVerifying(true);
 
-    const email = localStorage.getItem("email");
+    const email = (await Preferences.get({ key: "email" })).value ?? "";
     try {
-      const response = await fetch("/api/auth/verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          otp: data.otp,
-          email,
-        }),
-      });
+      const response = await verifyUser({ otp: data.otp, email: email! });
 
-      if (response.ok) {
-        const responseData = await response.json();
+      if (response.success) {
         toast.success("Account verified successfully", {
-          description: responseData.message,
+          description: response.message,
         });
 
-        localStorage.removeItem("email");
+        await Preferences.set({ key: "token", value: response.token });
+
+        dispatch(userData(response.user));
+
+        await Preferences.remove({ key: "email" });
         router.replace("/initial-info");
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.message);
       }
     } catch (error: any) {
       toast.error("Account verification failed!", {
@@ -95,8 +91,7 @@ const Verify = () => {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onOTPSubmit)}
-              className="w-full flex flex-col justify-center items-center space-y-6"
-            >
+              className="w-full flex flex-col justify-center items-center space-y-6">
               <FormField
                 control={form.control}
                 name="otp"
@@ -109,8 +104,7 @@ const Verify = () => {
                       <InputOTP
                         maxLength={6}
                         {...field}
-                        containerClassName="justify-center"
-                      >
+                        containerClassName="justify-center">
                         <InputOTPGroup>
                           <InputOTPSlot index={0} className="text-base" />
                           <InputOTPSlot index={1} className="text-base" />
@@ -133,8 +127,7 @@ const Verify = () => {
                 type="submit"
                 disabled={isVerifying}
                 size={"lg"}
-                className="text-sm lg:text-base font-medium"
-              >
+                className="text-sm lg:text-base font-medium">
                 {isVerifying ? (
                   <span className="flex items-center">
                     <Loader2 className="mr-2 w-4 h-4 animate-spin" /> Verifying

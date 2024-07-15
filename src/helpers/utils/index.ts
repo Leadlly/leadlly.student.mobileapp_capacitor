@@ -1,81 +1,95 @@
-export function getTodaysFormattedDate() {
-  const daysOfWeek = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-  const monthsOfYear = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
+import DOMPurify from "dompurify";
+import { SUBJECT_COLORS } from "../constants";
+import { Subject } from "../types";
 
+const daysOfWeek = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+const monthsOfYear = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+export function getTodaysDay() {
   const today = new Date();
   const dayOfWeek = daysOfWeek[today.getDay()];
+
+  return `${dayOfWeek}`;
+}
+
+export function getMonthDate(date: Date): string {
+  const dayOfMonth: string = String(date.getDate()).padStart(2, "0");
+  const month: string = monthsOfYear[date.getMonth()];
+
+  return `${month} ${dayOfMonth}`;
+}
+
+export function getTodaysFormattedDate() {
+  const today = new Date();
   const dayOfMonth = String(today.getDate()).padStart(2, "0");
   const month = monthsOfYear[today.getMonth()];
   const year = today.getFullYear();
 
-  return `${dayOfWeek} ${dayOfMonth} ${month} ${year}`;
+  return `${dayOfMonth} ${month} ${year}`;
 }
 
 export function getFormattedDate(date: Date): string {
-  const daysOfWeek: string[] = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-  const monthsOfYear: string[] = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-
-  const dayOfWeek: string = daysOfWeek[date.getDay()];
   const dayOfMonth: string = String(date.getDate()).padStart(2, "0");
   const month: string = monthsOfYear[date.getMonth()];
   const year: number = date.getFullYear();
 
-  return `${dayOfWeek} ${dayOfMonth} ${month} ${year}`;
+  return `${dayOfMonth} ${month} ${year}`;
 }
 
-export function convertDateString(inputDate: string): string {
-  // Parse the input date string
-  const date = new Date(inputDate);
+export function convertDateString(inputDate: Date): string {
+  const utcDate = new Date(inputDate);
 
-  // Extract the day, month, and year
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // getUTCMonth() is zero-based
-  const year = date.getUTCFullYear();
+  // Convert to IST by adding 5 hours and 30 minutes
+  const istDate = new Date(utcDate.getTime() + 5.5 * 60 * 60 * 1000);
+
+  // Format the date
+  const day = istDate.getDate().toString().padStart(2, "0");
+  const month = (istDate.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-indexed
+  const year = istDate.getFullYear();
 
   // Format the date as DD-MM-YYYY
   return `${day}-${month}-${year}`;
+}
+
+export function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = date.toLocaleString("default", { month: "short" });
+  return `${day} ${month}`;
+}
+
+export function calculateDaysLeft(meetingDate: Date): number {
+  // Get the current date
+  const currentDate = new Date();
+
+  // Calculate the difference in milliseconds
+  const differenceInMs = meetingDate.getTime() - currentDate.getTime();
+
+  // Convert milliseconds to days
+  const daysLeft = Math.ceil(differenceInMs / (1000 * 60 * 60 * 24));
+
+  return daysLeft - 1;
 }
 
 export function capitalizeFirstLetter(
@@ -86,4 +100,37 @@ export function capitalizeFirstLetter(
   }
 
   return sentence.charAt(0).toUpperCase() + sentence.slice(1);
+}
+
+export const formatTime = (seconds: number) => {
+  const days = Math.floor(seconds / (24 * 60 * 60))
+    .toString()
+    .padStart(2, "0");
+  const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60))
+    .toString()
+    .padStart(2, "0");
+  const minutes = Math.floor((seconds % (60 * 60)) / 60)
+    .toString()
+    .padStart(2, "0");
+  const secs = (seconds % 60).toString().padStart(2, "0");
+
+  return `${days}d : ${hours}h : ${minutes}m : ${secs}s`;
+};
+
+export const sanitizedHtml = (htmlString: string) => {
+  DOMPurify.sanitize(htmlString);
+  return htmlString;
+};
+
+export const getColorBySubject = (subject: Subject): string => {
+  return SUBJECT_COLORS[subject] || "bg-[#B0BEC5]";
+};
+
+export function isMoodButtonDisabled(lastMoodDate: String) {
+  if (!lastMoodDate) return false;
+
+  const today = new Date();
+  const formattedToday = today.toISOString().split("T")[0];
+
+  return lastMoodDate === formattedToday;
 }
