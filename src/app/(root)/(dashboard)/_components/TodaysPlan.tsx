@@ -1,80 +1,131 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { Suspense, useEffect, useState } from "react";
 
-import { RightArrowIcon } from "@/components";
-import { Checkbox } from "@/components/ui/checkbox";
-
-import { getTodaysFormattedDate } from "@/helpers/utils";
-import { TDashboardTodaysTopic } from "@/helpers/types";
-import { quizQuestions } from "@/helpers/constants";
+import { getFormattedDate } from "@/helpers/utils";
+import { DataProps, TDayProps } from "@/helpers/types";
 
 import QuestionDialogBox from "./QuestionDialogBox";
+import { getPlanner } from "@/actions/planner_actions";
+import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
+import { useReadLocalStorage, useIsMounted } from "usehooks-ts";
+import Loader from "@/components/shared/Loader";
+import ToDoListButton from "./ToDoListButton";
+import ToDoSkeleton from "./_skeletons/ToDoSkeleton";
 
-const TodaysPlan = ({
-  todaysTopics,
-}: {
-  todaysTopics: TDashboardTodaysTopic[];
-}) => {
+const TodaysPlan = () => {
   const [openQuestionDialogBox, setOpenQuestionDialogBox] = useState(false);
-  const [topic, setTopic] = useState("");
+  const [topic, setTopic] = useState<{ name: string; _id: string } | null>(
+    null
+  );
+  const [quizData, setQuizData] = useState<TDayProps | null>(null);
 
-  const handleCheckboxClick = (topic: string) => {
-    setTopic(topic);
+  const completedTopics: { expiryDate: number; value: string[] } | null =
+    useReadLocalStorage("completed_topic");
+
+  const incompleteTopics: { expiryDate: number; value: string[] } | null =
+    useReadLocalStorage("incomplete_topic");
+
+  const isMounted = useIsMounted();
+
+  const handleCheckboxClick = (topic: string, topicId: string) => {
+    setTopic({ name: topic, _id: topicId });
     setOpenQuestionDialogBox(true);
   };
+
+  useEffect(() => {
+    const getQuestionData = async () => {
+      const { data }: DataProps = await getPlanner();
+
+      setQuizData(
+        data?.days.filter(
+          (item) =>
+            getFormattedDate(new Date(item.date)) ===
+            getFormattedDate(new Date(Date.now()))
+        )[0] || null
+      );
+    };
+
+    getQuestionData();
+  }, []);
+
+  useEffect(() => {
+    if (
+      isMounted() &&
+      completedTopics &&
+      new Date().getTime() >= completedTopics?.expiryDate!
+    ) {
+      localStorage.removeItem("completed_topic");
+    }
+    if (
+      isMounted() &&
+      incompleteTopics &&
+      new Date().getTime() >= incompleteTopics?.expiryDate!
+    ) {
+      localStorage.removeItem("incomplete_topic");
+    }
+  }, [isMounted]);
+
+  if (!quizData) {
+    return <ToDoSkeleton />;
+  }
 
   return (
     <>
       <div className="flex items-center justify-between py-3 px-4 md:px-6">
-        <div className="flex items-center gap-2 md:flex-col md:gap-1">
-          <h4 className="text-base md:text-xl font-semibold">
-            Today&apos;s Plan
-          </h4>
+        <div className="w-full flex justify-between items-center gap-2 md:flex-col md:items-start md:gap-1">
+          <h4 className="text-base md:text-xl font-semibold">Todo list</h4>
           <p className="text-[10px] md:text-xs mt-[2px] md:mt-0 font-medium text-[#9E9C9C]">
-            {getTodaysFormattedDate()}
+            {quizData?.day} {getFormattedDate(new Date(quizData?.date!))}
           </p>
         </div>
-        <Link
-          href="/"
-          className="flex items-center gap-4 text-[#A36AF5] text-sm md:text-base">
-          View all
-          <RightArrowIcon className="md:w-[9px] md:h-[9px] stroke-[#A36AF5]" />
-        </Link>
       </div>
 
       <div className="w-full flex-1 px-4 md:px-6 overflow-y-auto custom__scrollbar">
-        <ul className="w-full h-full flex flex-col justify-start gap-1 md:gap-4 xl:gap-0">
-          {todaysTopics.map((topic, i) => (
-            <div key={i} className="flex items-center justify-between">
-              <li className="flex items-start gap-2 w-full py-1">
-                <Checkbox
-                  className="h-4 w-4 md:h-[18px] md:w-[18px] md:mt-[2px] border-[2px] border-[#787878] data-[state=checked]:bg-green-400 data-[state=checked]:text-white data-[state=checked]:border-none"
-                  checked={topic.completed}
-                  onClick={() => handleCheckboxClick(topic.label)}
+        <ul className="w-full h-full flex flex-col justify-start gap-2 md:gap-5 xl:gap-1">
+          {quizData &&
+          (quizData?.backRevisionTopics.length > 0 ||
+            quizData.continuousRevisionTopics.length > 0) ? (
+            <>
+              {quizData?.backRevisionTopics.map((topic) => (
+                <ToDoListButton
+                  key={topic._id}
+                  setTopic={setTopic}
+                  setOpenQuestionDialogBox={setOpenQuestionDialogBox}
+                  topic={topic}
+                  completedTopics={completedTopics!}
+                  incompleteTopics={incompleteTopics!}
                 />
-                <div className="capitalize text-sm md:text-base font-medium">
-                  <p>{topic.label}</p>
-                </div>
-              </li>
-              {topic.completed && (
-                <div className="text-[10px] py-[2px] px-1 text-green-500 bg-green-400/10 rounded capitalize">
-                  <p>completed</p>
-                </div>
-              )}
+              ))}
+              {quizData.continuousRevisionTopics.map((topic) => (
+                <ToDoListButton
+                  key={topic._id}
+                  setTopic={setTopic}
+                  setOpenQuestionDialogBox={setOpenQuestionDialogBox}
+                  topic={topic}
+                  completedTopics={completedTopics!}
+                  incompleteTopics={incompleteTopics!}
+                />
+              ))}
+            </>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+              No topics for today!
             </div>
-          ))}
+          )}
         </ul>
       </div>
 
       {openQuestionDialogBox && (
-        <QuestionDialogBox
-          openQuestionDialogBox={openQuestionDialogBox}
-          setOpenQuestionDialogBox={setOpenQuestionDialogBox}
-          questions={quizQuestions}
-          topic={topic}
-        />
+        <Suspense fallback={<Loader />}>
+          <QuestionDialogBox
+            openQuestionDialogBox={openQuestionDialogBox}
+            setOpenQuestionDialogBox={setOpenQuestionDialogBox}
+            questions={quizData?.questions[topic?.name!]}
+            topic={topic}
+          />
+        </Suspense>
       )}
     </>
   );

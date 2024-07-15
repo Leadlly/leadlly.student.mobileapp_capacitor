@@ -1,6 +1,6 @@
 "use client";
 
-// import { buySubscription } from "@/actions/payment_actions";
+import { buySubscription } from "@/actions/subscription_actions";
 import { Button } from "@/components/ui/button";
 import { UserDataProps } from "@/helpers/types";
 import { cn } from "@/lib/utils";
@@ -12,11 +12,9 @@ import { toast } from "sonner";
 const PaymentButton = ({
   title,
   duration,
-}: // user,
-{
+}: {
   title: string;
   duration: string;
-  // user: UserDataProps;
 }) => {
   const [subscriptionId, setSubscriptionId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -25,9 +23,8 @@ const PaymentButton = ({
     setIsLoading(true);
 
     try {
-      // const data = await buySubscription(duration);
-      // setSubscriptionId(data?.id);
-      console.log("Hello");
+      const data = await buySubscription(duration);
+      setSubscriptionId(data?.id);
     } catch (error: any) {
       toast.error("Error buying subscription", {
         description: error?.message,
@@ -45,11 +42,7 @@ const PaymentButton = ({
           name: "Leadlly",
           subscription_id: subscriptionId,
           callback_url: `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/subscribe/verify`,
-          prefill: {
-            // name: user.firstname,
-            // email: user.email,
-            contact: "",
-          },
+
           notes: {
             address: "Razorpay Corporate Office",
           },

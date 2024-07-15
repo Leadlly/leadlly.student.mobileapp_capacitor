@@ -1,7 +1,5 @@
-"use server";
+import { Preferences } from "@capacitor/preferences";
 
-import { cookies } from "next/headers";
-
-export const getCookie = async (name: string) => {
-  return cookies().get(name)?.value ?? "";
+export const getCookie = async () => {
+  return (await Preferences.get({ key: "token" })).value ?? "";
 };

@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import GoogleLoginButton from "@/app/(auth)/_components/GoogleLoginButton";
 import { signUpUser } from "@/actions/user_actions";
+import { Preferences } from "@capacitor/preferences";
 
 const SignUp = () => {
   const [togglePassword, setTogglePassword] = useState(false);
@@ -39,26 +40,11 @@ const SignUp = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/auth/register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-          credentials: "include",
-          cache: "no-store",
-        }
-      );
-
-      console.log(response);
-
-      const responseData = await response.json();
+      const responseData = await signUpUser(data);
 
       if (responseData.success) {
         toast.success(responseData.message);
-        localStorage.setItem("email", data.email);
+        await Preferences.set({ key: "email", value: data.email });
         router.replace("/verify");
       } else {
         toast.error(responseData.message);

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import PaymentButton from "./PaymentButton";
-// import { getUser } from "@/actions/user_actions";
+import { getUser } from "@/actions/user_actions";
 
 type PlanPriceProps = {
   title: string;
@@ -10,13 +10,12 @@ type PlanPriceProps = {
   className?: string;
 };
 
-const PlanPriceBox = async ({
+const PlanPriceBox = ({
   title,
   duration,
   amount,
   className,
 }: PlanPriceProps) => {
-  // const userData = await getUser();
   return (
     <div
       className={cn(
@@ -48,11 +47,7 @@ const PlanPriceBox = async ({
         </div>
 
         <div className="grid place-items-center">
-          <PaymentButton
-            duration={duration}
-            title={title}
-            // user={userData.user}
-          />
+          <PaymentButton duration={duration} title={title} />
         </div>
       </div>
     </div>

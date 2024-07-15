@@ -26,8 +26,9 @@ import { Input } from "@/components/ui/input";
 import GoogleLoginButton from "@/app/(auth)/_components/GoogleLoginButton";
 
 import { useAppDispatch } from "@/redux/hooks";
-import { getUser } from "@/actions/user_actions";
+import { getUser, loginUser } from "@/actions/user_actions";
 import { userData } from "@/redux/slices/userSlice";
+import { Preferences } from "@capacitor/preferences";
 
 const Login = () => {
   const [togglePassword, setTogglePassword] = useState(false);
@@ -48,27 +49,13 @@ const Login = () => {
     setIsLoggingIn(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      const response = await loginUser(data);
 
-      const userDataInfo = await getUser();
-
-      dispatch(userData(userDataInfo?.user));
-      if (response.ok) {
-        const responseData = await response.json();
-        toast.success(responseData.message);
-
+      if (response.success) {
+        toast.success(response.message);
+        await Preferences.set({ key: "token", value: response.token });
+        dispatch(userData(response.user));
         router.replace("/");
-      } else {
-        const errorData = await response.json();
-        toast.error("Login Failed", {
-          description: errorData.message,
-        });
       }
     } catch (error: any) {
       console.log(error);
@@ -110,8 +97,7 @@ const Login = () => {
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onFormSubmit)}
-                  className="space-y-4"
-                >
+                  className="space-y-4">
                   <FormField
                     control={form.control}
                     name="email"
@@ -146,8 +132,7 @@ const Login = () => {
                                 className="cursor-pointer"
                                 onClick={() =>
                                   setTogglePassword(!togglePassword)
-                                }
-                              >
+                                }>
                                 {togglePassword ? (
                                   <EyeOff className="w-5 h-5 opacity-70" />
                                 ) : (
@@ -183,8 +168,7 @@ const Login = () => {
                   <Button
                     type="submit"
                     className="w-full text-lg md:text-xl h-12"
-                    disabled={isLoggingIn}
-                  >
+                    disabled={isLoggingIn}>
                     {isLoggingIn ? (
                       <span className="flex items-center">
                         <Loader2 className="w-6 h-6 animate-spin mr-2" />{" "}

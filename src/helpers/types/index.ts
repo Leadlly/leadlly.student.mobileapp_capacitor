@@ -1,4 +1,5 @@
 import React, { SVGProps } from "react";
+import { SUBJECT_COLORS } from "../constants";
 
 export type TContainerProps = {
   children: React.ReactNode;
@@ -75,24 +76,38 @@ export type TLevelPointProps = {
 export type TMoodEmojisProps = {
   mood: string;
   mood_id: string;
-  moodImg:string
+  moodImg: string;
 };
 
 export type TQuizQuestionProps = {
+  chapter: string[];
+  createdAt: string;
+  createdBy: string;
+  images: [];
+  level: string;
+  options: Array<{
+    name: string;
+    tag: string;
+    images: string | null;
+    _id: string;
+  }>;
   question: string;
-  options: {
-    all: string[];
-    correct: string[];
-  };
+  standard: number;
+  subject: string;
+  subtopics: [];
+  topics: string[];
+  _id: string;
+};
+
+export type TQuizAnswerProps = {
+  question: {};
+  studentAnswer: string;
+  isCorrect: boolean;
+  tag: string;
 };
 
 export type TPlannerTodaysTopic = {
   subject: string;
-  topics: string;
-};
-
-export type TWeeklyPlanProps = {
-  date: Date;
   topics: string;
 };
 
@@ -143,18 +158,41 @@ export type subjectChaptersProps = {
   }[];
 };
 
+export interface ISubject {
+  name: string;
+  overall_efficiency: number;
+  overall_progress: number;
+  total_questions_solved: number;
+}
+
+export interface IAcademic {
+  standard: number;
+  competitiveExam?: string | null;
+  subjects?: ISubject[];
+  schedule?: string | null;
+  coachingMode?: string | null;
+  coachingName?: string | null;
+  coachingAddress?: string | null;
+  schoolOrCollegeName?: string | null;
+  schoolOrCollegeAddress?: string | null;
+}
+
 export type UserDataProps = {
   firstname: string;
   lastname?: string;
   email: string;
-  phone?: {
+  phone: {
     personal?: number;
     other?: number;
   };
+
+  password: string;
+  salt: string;
   avatar?: {
     public_id?: string;
     url?: string;
   };
+  planner: Boolean;
   parent: {
     name?: string;
     phone?: string;
@@ -164,17 +202,8 @@ export type UserDataProps = {
     addressLine?: string;
     pincode?: number;
   };
-  academic: {
-    examName?: string;
-    schedule?: string;
-    coachingMode?: string;
-    coachingName?: string;
-    coachingAddress?: string;
-    schoolOrCollegeName?: string;
-    schoolOrCollegeAddress?: string;
-  };
+  academic: IAcademic;
   about: {
-    standard: number;
     dateOfBirth?: string;
     gender: string;
   };
@@ -199,10 +228,23 @@ export type UserDataProps = {
     status?: string;
     dateOfActivation?: Date;
   };
-  quiz?: {
-    minor?: any[];
-    major?: any[];
+  freeTrial: {
+    availed?: Boolean;
+    active?: Boolean;
+    dateOfActivation?: Date;
+    dateOfDeactivation?: Date;
   };
+  refund: {
+    type?: string;
+    subscriptionType?: string;
+    status?: string;
+    amount?: string;
+  };
+  createdAt?: Date;
+};
+
+export type UserProps = {
+  user: UserDataProps | null;
 };
 
 export type OTPProps = {
@@ -250,4 +292,142 @@ export type StudentPersonalInfoProps = {
   schoolOrCollegeAddress?: string;
   schoolOrCollegeName?: string;
   studentSchedule?: string;
+};
+
+export interface Option {
+  name: string;
+  tag: string;
+  images?: string | null;
+  _id: string;
+}
+
+export interface Question {
+  _id: string;
+  question: string;
+  options: Option[];
+}
+
+export interface Questions {
+  [key: string]: Question | undefined;
+}
+
+export type Topic = {
+  name: string;
+  plannerFrequency?: number;
+  level?: string;
+  overall_efficiency?: number;
+  studiedAt: {
+    date?: Date;
+    efficiency?: number;
+  }[];
+};
+
+export type Chapter = {
+  name: string;
+  plannerFrequency?: number;
+  level?: string;
+  overall_efficiency?: number;
+  studiedAt: {
+    date?: Date;
+    efficiency?: number;
+  }[];
+};
+
+export type subject = {
+  name: string;
+  overall_efficiency?: number;
+};
+
+export type TRevisionProps = {
+  _id: string;
+  user: string;
+  tag: string;
+  topic: Topic;
+  chapter: Chapter;
+  subject: subject;
+  standard: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  efficiency?: any;
+  quizScores?: number[];
+  weeklyTestScore?: number;
+};
+
+export type TDayProps = {
+  date: string;
+  day: string;
+  continuousRevisionTopics: TRevisionProps[];
+  backRevisionTopics: TRevisionProps[];
+  questions: { [key: string]: any };
+  _id: string;
+};
+
+export type PlannerDataProps = {
+  student: string;
+  startDate: string;
+  endDate: string;
+  days: TDayProps[];
+  createdAt: string;
+};
+
+export type DataProps = {
+  data: PlannerDataProps;
+};
+export type Subject = keyof typeof SUBJECT_COLORS;
+export interface AttemptedWeeklyQuiz {
+  id: number;
+  description: string;
+  startDate: string;
+  endDate: string;
+  subject: Subject;
+  completedDate: string;
+  efficiency: number;
+  questions: number;
+}
+export interface AttemptedQuizProps {
+  id: number;
+  chapterName: string;
+  description: string;
+  subject: Subject;
+  questions: number;
+  completedDate: string;
+  efficiency: number;
+}
+export type UnattemptedWeeklyQuiz = {
+  id: number;
+  description: string;
+  startDate: string;
+  endDate: string;
+  subjects: Subject[];
+  questions: number;
+};
+
+export type UnattemptedChapterQuizProps = {
+  id: number;
+  chapterName: string;
+  description: string;
+  subject: Subject;
+  questions: number;
+};
+
+export type TTrackerProps = {
+  _id: string;
+  user: string;
+  subject: string;
+  chapter: Chapter;
+  topics: Topic[];
+};
+
+export type TMeetingsProps = {
+  rescheduled: { isRescheduled: boolean };
+  gmeet: { link: string | null };
+  _id: string;
+  date: string;
+  time: string;
+  student: string;
+  mentor: string;
+  accepted: boolean;
+  message: string;
+  createdAt: string;
+  updatedAt: string;
 };

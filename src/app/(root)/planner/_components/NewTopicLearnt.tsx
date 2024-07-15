@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { cn } from "@/lib/utils";
 
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Loader2 } from "lucide-react";
 
 import { LeftArrowIcon, MenuIcon } from "@/components";
 import { Button } from "@/components/ui/button";
@@ -34,34 +34,44 @@ import {
 } from "@/components/ui/command";
 import { MultiSelect } from "@/components/ui/multi-select";
 
-// import {
-//   getChapterTopics,
-//   getSubjectChapters,
-// } from "@/actions/question_actions";
+import {
+  getChapterTopics,
+  getSubjectChapters,
+} from "@/actions/question_actions";
 
-import { subjectChaptersProps } from "@/helpers/types";
+import { ISubject, subjectChaptersProps } from "@/helpers/types";
 
-import { userSubjects } from "@/helpers/constants";
 import { toast } from "sonner";
+import { saveStudyData } from "@/actions/studyData_actions";
+import { getPlanner, updatePlanner } from "@/actions/planner_actions";
+import { useRouter } from "next/navigation";
 
 const NewTopicLearntSchema = z.object({
   chapterName: z.string({ required_error: "Please select a chapter!" }),
   topicNames: z
     .string({ required_error: "Please select at least one topic" })
     .array()
-    .nonempty({ message: "Please select at least one topic" }),
+    .min(1, { message: "Please select at least one topic" })
+    .default([]),
 });
 
 const NewTopicLearnt = ({
   setNewTopicLearnt,
+  userSubjects,
+  userStandard,
 }: {
   setNewTopicLearnt: (newTopicLearnt: boolean) => void;
+  userSubjects: ISubject[];
+  userStandard: number;
 }) => {
   const [activeSubject, setActiveSubject] = useState("maths");
   const [activeTabChapters, setActiveTabChapters] = useState<
     subjectChaptersProps[]
   >([]);
   const [topics, setTopics] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof NewTopicLearntSchema>>({
     resolver: zodResolver(NewTopicLearntSchema),
@@ -70,59 +80,93 @@ const NewTopicLearnt = ({
   const selectedChapter = form.watch("chapterName");
 
   const onSubmit = async (data: z.infer<typeof NewTopicLearntSchema>) => {
-    console.log(data);
+    setIsSubmitting(true);
+
+    const formattedData = {
+      tag: "continuous_revision",
+      topics: data.topicNames.map((topic) => ({ name: topic })),
+      chapter: {
+        name: data.chapterName,
+      },
+      subject: activeSubject,
+      standard: userStandard,
+    };
+
+    try {
+      const responseData = await saveStudyData(formattedData);
+
+      toast.success(responseData.message);
+
+      await updatePlanner();
+
+      form.reset();
+
+      router.refresh();
+    } catch (error: any) {
+      toast.error(error?.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  // useEffect(() => {
-  //   const chapters = async () => {
-  //     try {
-  //       const data = await getSubjectChapters(activeSubject, 11);
+  useEffect(() => {
+    const chapters = async () => {
+      try {
+        const data = await getSubjectChapters(activeSubject, userStandard);
 
-  //       setActiveTabChapters(data.chapters);
-  //     } catch (error: any) {
-  //       toast.error("Unable to fetch chapters!", {
-  //         description: error.message,
-  //       });
-  //     }
-  //   };
+        setActiveTabChapters(data.chapters);
+      } catch (error: any) {
+        toast.error("Unable to fetch chapters!", {
+          description: error.message,
+        });
+      }
+    };
 
-  //   chapters();
-  // }, [activeSubject]);
+    chapters();
+  }, [activeSubject, userStandard]);
 
-  // useEffect(() => {
-  //   const topics = async () => {
-  //     try {
-  //       const data = await getChapterTopics(activeSubject, selectedChapter, 11);
-  //       setTopics(data.topics);
-  //     } catch (error: any) {
-  //       toast.error("Unable to fetch topics!", {
-  //         description: error.message,
-  //       });
-  //     }
-  //   };
+  useEffect(() => {
+    const topics = async () => {
+      try {
+        const data = await getChapterTopics(
+          activeSubject,
+          selectedChapter,
+          userStandard
+        );
+        setTopics(data.topics);
+      } catch (error: any) {
+        toast.error("Unable to fetch topics!", {
+          description: error.message,
+        });
+      }
+    };
 
-  //   topics();
-  // }, [activeSubject, selectedChapter]);
+    topics();
+  }, [activeSubject, selectedChapter, userStandard]);
 
   return (
     <div className="w-full px-3 lg:px-7 space-y-6">
       <div className="w-full flex items-center justify-between">
         <ul className="flex items-center gap-4">
-          {userSubjects.map((item) => (
+          {userSubjects.map((item, index) => (
             <li
-              key={item.id}
+              key={index}
               className={cn(
                 "capitalize font-semibold text-[#6a6a6a] border px-3 py-1 rounded-lg cursor-pointer",
-                activeSubject === item.id
+                activeSubject === item.name
                   ? "bg-primary/10 border-primary text-black"
                   : ""
               )}
-              onClick={() => setActiveSubject(item.label)}>
-              {item.label}
+              onClick={() => {
+                setActiveSubject(item.name);
+                form.setValue("chapterName", "");
+                form.setValue("topicNames", []);
+              }}
+            >
+              {item.name}
             </li>
           ))}
         </ul>
-        <MenuIcon className="md:w-4 md:h-4 cursor-pointer" />
       </div>
 
       <Form {...form}>
@@ -141,7 +185,8 @@ const NewTopicLearnt = ({
                         className={cn(
                           "w-full justify-between",
                           !field.value && "text-muted-foreground"
-                        )}>
+                        )}
+                      >
                         {field.value
                           ? activeTabChapters.find(
                               (chapter) => chapter.name === field.value
@@ -163,7 +208,8 @@ const NewTopicLearnt = ({
                               key={chapter._id}
                               onSelect={() => {
                                 form.setValue("chapterName", chapter.name);
-                              }}>
+                              }}
+                            >
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
@@ -210,12 +256,21 @@ const NewTopicLearnt = ({
             <Button
               variant={"outline"}
               className="gap-x-2"
-              onClick={() => setNewTopicLearnt(false)}>
+              onClick={() => setNewTopicLearnt(false)}
+            >
               <LeftArrowIcon className="w-2 h-2" />
               Back
             </Button>
 
-            <Button type="submit">Submit</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <span className="flex items-center text-sm">
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting
+                </span>
+              ) : (
+                "Submit"
+              )}
+            </Button>
           </div>
         </form>
       </Form>
