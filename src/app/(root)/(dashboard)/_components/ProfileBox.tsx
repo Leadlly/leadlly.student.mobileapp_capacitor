@@ -2,13 +2,12 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-
-import { useAppSelector } from "@/redux/hooks";
+import { useAuth } from "@/contexts/AuthProviderContext";
 
 import Link from "next/link";
 
 const ProfileBox = () => {
-  const user = useAppSelector((state) => state.user?.user);
+  const { user } = useAuth();
 
   return (
     <div className="flex flex-col justify-center xl:justify-start xl:gap-4 border rounded-xl bg-gradient-to-b from-white/15 to-primary/15 px-5 py-3">
@@ -35,8 +34,7 @@ const ProfileBox = () => {
             <Link href={"/manage-account"}>
               <Button
                 variant={"outline"}
-                className="text-primary hover:text-primary/80 h-7"
-              >
+                className="text-primary hover:text-primary/80 h-7">
                 Manage Account
               </Button>
             </Link>
@@ -53,8 +51,7 @@ const ProfileBox = () => {
           <Link href={"/manage-account"}>
             <Button
               variant={"outline"}
-              className="text-primary hover:text-primary/80"
-            >
+              className="text-primary hover:text-primary/80">
               Manage Account
             </Button>
           </Link>

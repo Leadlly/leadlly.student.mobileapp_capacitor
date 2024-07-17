@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { moodEmojis } from "@/helpers/constants";
-import { getUser, setTodaysVibe } from "@/actions/user_actions";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { setTodaysVibe } from "@/actions/user_actions";
 import { userData } from "@/redux/slices/userSlice";
 import { Loader2 } from "lucide-react";
 import { isMoodButtonDisabled } from "@/helpers/utils";
+import { useAuth } from "@/contexts/AuthProviderContext";
 
 const MoodEmojiSelector = () => {
-  const user = useAppSelector((state) => state.user.user);
+  const { user, setUser } = useAuth();
 
   const userCurrentMood = user?.details?.mood;
   const today = new Date().toISOString().split("T")[0];
@@ -32,8 +32,6 @@ const MoodEmojiSelector = () => {
 
   const [isCurrentMood, setIsCurrentMood] = useState(false);
 
-  const dispatch = useAppDispatch();
-
   const handleChangeMood = async (mood: string) => {
     setIsCurrentMood(true);
     try {
@@ -43,15 +41,13 @@ const MoodEmojiSelector = () => {
         todaysVibe: mood,
       });
 
-      dispatch(
-        userData({
-          ...user,
-          details: {
-            ...user?.details,
-            mood: [...(user?.details?.mood || []), { day: today, emoji: mood }],
-          },
-        })
-      );
+      setUser({
+        ...user!,
+        details: {
+          ...user?.details,
+          mood: [...(user?.details?.mood || []), { day: today, emoji: mood }],
+        },
+      });
       toast.success(response.message);
       // setIsTodaysMoodSet(true);
     } catch (error: any) {

@@ -6,12 +6,12 @@ import { cn } from "@/lib/utils";
 import { subjectChaptersProps, TRevisionProps } from "@/helpers/types";
 import { getSubjectChapters } from "@/actions/question_actions";
 import { toast } from "sonner";
-import { useAppSelector } from "@/redux/hooks";
 import { MotionDiv } from "@/components/shared/MotionDiv";
 import Image from "next/image";
 import AccountSubjectForm from "@/app/(student-account)/manage-account/_components/AccountSubjectForm";
 import AccountChaptersList from "@/app/(student-account)/manage-account/_components/AccountChaptersList";
 import ProceedButton from "./ProceedButton";
+import { useAuth } from "@/contexts/AuthProviderContext";
 
 const InitialStudyDataPage = ({
   unrevisedTopics,
@@ -25,7 +25,8 @@ const InitialStudyDataPage = ({
     return () => {};
   });
 
-  const userAcademic = useAppSelector((state) => state.user.user?.academic);
+  const { user } = useAuth();
+  const userAcademic = user?.academic;
 
   const [activeSubject, setActiveSubject] = useState(
     userAcademic?.subjects?.[0].name
@@ -76,31 +77,32 @@ const InitialStudyDataPage = ({
 
         <div className="flex justify-center">
           <ul className="flex items-center gap-3 border-2 rounded-md p-1">
-            {userAcademic?.subjects?.map((subject) => (
-              <li
-                key={subject.name}
-                className={cn(
-                  "relative text-base md:text-lg capitalize font-medium px-3 py-1 cursor-pointer",
-                  activeSubject === subject.name && "text-white"
-                )}
-                onClick={() => {
-                  setActiveSubject(subject.name);
-                  resetForm();
-                }}
-              >
-                {subject.name}
-                {activeSubject === subject.name && (
-                  <MotionDiv
-                    layoutId="active_chat_tab"
-                    transition={{
-                      type: "spring",
-                      duration: 0.6,
-                    }}
-                    className="absolute rounded h-full w-full -z-10 bg-primary inset-0"
-                  />
-                )}
-              </li>
-            ))}
+            {userAcademic?.subjects && userAcademic.subjects.length
+              ? userAcademic?.subjects?.map((subject) => (
+                  <li
+                    key={subject.name}
+                    className={cn(
+                      "relative text-base md:text-lg capitalize font-medium px-3 py-1 cursor-pointer",
+                      activeSubject === subject.name && "text-white"
+                    )}
+                    onClick={() => {
+                      setActiveSubject(subject.name);
+                      resetForm();
+                    }}>
+                    {subject.name}
+                    {activeSubject === subject.name && (
+                      <MotionDiv
+                        layoutId="active_chat_tab"
+                        transition={{
+                          type: "spring",
+                          duration: 0.6,
+                        }}
+                        className="absolute rounded h-full w-full -z-10 bg-primary inset-0"
+                      />
+                    )}
+                  </li>
+                ))
+              : null}
           </ul>
         </div>
 

@@ -15,9 +15,10 @@ import UpcomingWorkshops from "./UpcomingWorkshops";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { useAppSelector } from "@/redux/hooks";
+import { useAuth } from "@/contexts/AuthProviderContext";
 
 const UserProfileSheet = () => {
-  const user = useAppSelector((state) => state.user.user);
+  const { user } = useAuth();
   return (
     <Sheet>
       <SheetTrigger>
@@ -37,8 +38,7 @@ const UserProfileSheet = () => {
       <SheetContent
         className="w-full sm:min-w-full py-4 flex flex-col gap-y-4 overflow-y-auto custom__scrollbar"
         icon={<ArrowLeft className="w-5 h-5" />}
-        sheetCloseClassName="left-4"
-      >
+        sheetCloseClassName="left-4">
         <SheetHeader className="text-left ml-10 text-xl font-semibold -mt-1">
           Profile
         </SheetHeader>

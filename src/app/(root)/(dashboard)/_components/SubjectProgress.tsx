@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { SemiRadialChart, TabContent, TabNavItem } from "@/components";
 import { useAppSelector } from "@/redux/hooks";
+import { useAuth } from "@/contexts/AuthProviderContext";
 
 const SubjectProgress = () => {
-  const userSubjects = useAppSelector(
-    (state) => state.user.user?.academic?.subjects
-  );
+  const { user } = useAuth();
+  const userSubjects = user?.academic.subjects;
   const [activeTab, setActiveTab] = useState(userSubjects?.[0].name);
 
   const subject = userSubjects?.filter(

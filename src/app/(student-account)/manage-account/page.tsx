@@ -5,15 +5,13 @@ import ManageAccountPage from "./_components/ManageAccountPage";
 import { useEffect, useState } from "react";
 import { TRevisionProps } from "@/helpers/types";
 
-const ManageAccount = async () => {
-  const [unrevisedTopics, setUnrevisedTopics] = useState<
-    TRevisionProps[] | null
-  >(null);
+const ManageAccount = () => {
+  const [unrevisedTopics, setUnrevisedTopics] = useState<TRevisionProps[]>([]);
 
   useEffect(() => {
     const getUnrevisedTopicsData = async () => {
       const data = await getUnrevisedTopics();
-      setUnrevisedTopics(data.data);
+      setUnrevisedTopics((prev) => [...prev, data.data]);
     };
 
     getUnrevisedTopicsData();

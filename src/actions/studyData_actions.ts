@@ -1,4 +1,3 @@
-import { revalidateTag } from "next/cache";
 import { getCookie } from "./cookie_actions";
 
 type StudyDataProps = {
@@ -23,15 +22,13 @@ export const saveStudyData = async (data: StudyDataProps) => {
         body: JSON.stringify(data),
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       }
     );
 
     const responseData = await res.json();
-
-    revalidateTag("unrevised_topics");
 
     return responseData;
   } catch (error: unknown) {
@@ -53,13 +50,9 @@ export const getUnrevisedTopics = async () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
-        cache: "force-cache",
-        next: {
-          tags: ["unrevised_topics"],
-        },
       }
     );
 
@@ -78,9 +71,9 @@ export const getUnrevisedTopics = async () => {
 };
 
 export const deleteUnrevisedTopics = async (data: { chapterName: string }) => {
-  const token = await getCookie();
-
   try {
+    const token = await getCookie();
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/user/topics/delete`,
       {
@@ -88,7 +81,7 @@ export const deleteUnrevisedTopics = async (data: { chapterName: string }) => {
         body: JSON.stringify(data),
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
 
         credentials: "include",
@@ -96,8 +89,6 @@ export const deleteUnrevisedTopics = async (data: { chapterName: string }) => {
     );
 
     const responseData = await res.json();
-
-    revalidateTag("unrevised_topics");
 
     return responseData;
   } catch (error: unknown) {

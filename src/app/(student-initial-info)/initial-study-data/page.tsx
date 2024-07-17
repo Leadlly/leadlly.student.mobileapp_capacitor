@@ -5,15 +5,13 @@ import InitialStudyDataPage from "./_components/InitialStudyDataPage";
 import { TRevisionProps } from "@/helpers/types";
 import { useEffect, useState } from "react";
 
-const InitialStudyData = async () => {
-  const [unrevisedTopics, setUnrevisedTopics] = useState<
-    TRevisionProps[] | null
-  >(null);
+const InitialStudyData = () => {
+  const [unrevisedTopics, setUnrevisedTopics] = useState<TRevisionProps[]>([]);
 
   useEffect(() => {
     const getUnrevisedTopicsData = async () => {
       const data = await getUnrevisedTopics();
-      setUnrevisedTopics(data.data);
+      setUnrevisedTopics((prev) => [...prev, data.data]);
     };
 
     getUnrevisedTopicsData();

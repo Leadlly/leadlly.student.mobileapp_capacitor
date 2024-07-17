@@ -5,16 +5,16 @@ export const getSubjectChapters = async (
   subject: string | string[],
   standard: number
 ) => {
-  const token = await getCookie();
-
   try {
+    const token = await getCookie();
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/questionbank/chapter?subjectName=${subject}&standard=${standard}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       }
@@ -38,16 +38,16 @@ export const getChapterTopics = async (
   chapterName: string,
   standard: number
 ) => {
-  const token = await getCookie();
-
   try {
+    const token = await getCookie();
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/questionbank/topic?subjectName=${subject}&chapterName=${chapterName}&standard=${standard}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       }

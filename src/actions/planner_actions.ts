@@ -1,23 +1,18 @@
 import { getCookie } from "./cookie_actions";
-import { revalidateTag } from "next/cache";
 
 export const getPlanner = async () => {
-  const token = await getCookie();
-
   try {
+    const token = await getCookie();
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/planner/get`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
-        cache: "force-cache",
-        next: {
-          tags: ["plannerData"],
-        },
       }
     );
 
@@ -34,16 +29,16 @@ export const getPlanner = async () => {
 };
 
 export const createPlanner = async () => {
-  const token = await getCookie();
-
   try {
+    const token = await getCookie();
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/planner/create`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       }
@@ -62,23 +57,22 @@ export const createPlanner = async () => {
 };
 
 export const updatePlanner = async () => {
-  const token = await getCookie();
-
   try {
+    const token = await getCookie();
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/planner/update`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       }
     );
 
     const responseData = await res.json();
-    revalidateTag("plannerData");
 
     return responseData;
   } catch (error: unknown) {

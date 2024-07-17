@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/contexts/AuthProviderContext";
 import { formatTime } from "@/helpers/utils";
 import { useAppSelector } from "@/redux/hooks";
 import { useRouter } from "next/navigation";
@@ -10,9 +11,8 @@ const TrialPeriodTimer = () => {
 
   const router = useRouter();
 
-  const freeTrialActivationDate = useAppSelector(
-    (state) => state.user.user?.freeTrial?.dateOfActivation
-  );
+  const { user } = useAuth();
+  const freeTrialActivationDate = user?.freeTrial.dateOfActivation;
 
   useEffect(() => {
     const checkTrialStatus = () => {

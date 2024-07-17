@@ -9,7 +9,7 @@ import { DataProps, PlannerDataProps } from "@/helpers/types";
 import { getPlanner } from "@/actions/planner_actions";
 import { useEffect, useState } from "react";
 
-const Planner = async () => {
+const Planner = () => {
   const [plannerData, setPlannerData] = useState<PlannerDataProps | null>(null);
 
   useEffect(() => {

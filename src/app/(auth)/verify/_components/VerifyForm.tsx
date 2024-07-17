@@ -31,6 +31,7 @@ import { Preferences } from "@capacitor/preferences";
 import { verifyUser } from "@/actions/user_actions";
 import { useAppDispatch } from "@/redux/hooks";
 import { userData } from "@/redux/slices/userSlice";
+import { useAuth } from "@/contexts/AuthProviderContext";
 
 const OTPFormSchema = z.object({
   otp: z
@@ -42,7 +43,7 @@ const Verify = () => {
   const [isVerifying, setIsVerifying] = useState(false);
 
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const { setUser } = useAuth();
 
   const form = useForm<z.infer<typeof OTPFormSchema>>({
     resolver: zodResolver(OTPFormSchema),
@@ -62,7 +63,7 @@ const Verify = () => {
 
         await Preferences.set({ key: "token", value: response.token });
 
-        dispatch(userData(response.user));
+        setUser(response.user);
 
         await Preferences.remove({ key: "email" });
         router.replace("/initial-info");

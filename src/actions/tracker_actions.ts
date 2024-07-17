@@ -1,21 +1,18 @@
 import { getCookie } from "./cookie_actions";
 
 export const getUserTracker = async (subject: string | string[]) => {
-  const token = await getCookie();
-
   try {
+    const token = await getCookie();
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/tracker/get?subject=${subject}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
-        next: {
-          tags: ["userTracker"],
-        },
       }
     );
 

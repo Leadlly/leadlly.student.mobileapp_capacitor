@@ -25,17 +25,16 @@ import {
 import { Input } from "@/components/ui/input";
 import GoogleLoginButton from "@/app/(auth)/_components/GoogleLoginButton";
 
-import { useAppDispatch } from "@/redux/hooks";
-import { getUser, loginUser } from "@/actions/user_actions";
-import { userData } from "@/redux/slices/userSlice";
+import { loginUser } from "@/actions/user_actions";
 import { Preferences } from "@capacitor/preferences";
+import { useAuth } from "@/contexts/AuthProviderContext";
 
 const Login = () => {
   const [togglePassword, setTogglePassword] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const { setUser } = useAuth();
 
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
@@ -52,10 +51,12 @@ const Login = () => {
       const response = await loginUser(data);
 
       if (response.success) {
-        toast.success(response.message);
         await Preferences.set({ key: "token", value: response.token });
-        dispatch(userData(response.user));
+        setUser(response.user);
+        toast.success(response.message);
         router.replace("/");
+      } else {
+        toast.error(response.message);
       }
     } catch (error: any) {
       console.log(error);

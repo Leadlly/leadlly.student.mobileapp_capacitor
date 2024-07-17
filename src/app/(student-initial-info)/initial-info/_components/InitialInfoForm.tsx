@@ -59,6 +59,11 @@ const StudentInitialInfoForm = () => {
     const formattedData = { class: Number(data.class) };
     try {
       const res = await studentPersonalInfo({ ...data, ...formattedData });
+      if (res.success && res.success === false) {
+        toast.error(res.message);
+        return;
+      }
+
       dispatch(userData(res.user));
 
       toast.success(res.message);

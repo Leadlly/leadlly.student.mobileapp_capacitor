@@ -5,7 +5,7 @@ import {
   StudentPersonalInfoProps,
 } from "@/helpers/types";
 import { getCookie } from "./cookie_actions";
-import { revalidateTag } from "next/cache";
+
 import apiClient from "@/apiClient/apiClient";
 
 export const signUpUser = async (data: SignUpDataProps) => {
@@ -164,15 +164,16 @@ export const resetPassword = async (
 };
 
 export const getUser = async () => {
-  const token = await getCookie();
   try {
+    const token = await getCookie();
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/auth/user`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       }
@@ -193,8 +194,9 @@ export const getUser = async () => {
 };
 
 export const studentPersonalInfo = async (data: StudentPersonalInfoProps) => {
-  const token = await getCookie();
   try {
+    const token = await getCookie();
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/user/profile/save`,
       {
@@ -202,11 +204,13 @@ export const studentPersonalInfo = async (data: StudentPersonalInfoProps) => {
         body: JSON.stringify(data),
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       }
     );
+
+    console.log(token);
 
     const responseData = await res.json();
 
@@ -221,8 +225,9 @@ export const studentPersonalInfo = async (data: StudentPersonalInfoProps) => {
 };
 
 export const setTodaysVibe = async (data: { todaysVibe: string }) => {
-  const token = await getCookie();
   try {
+    const token = await getCookie();
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/user/todaysVibe/save`,
       {
@@ -230,14 +235,13 @@ export const setTodaysVibe = async (data: { todaysVibe: string }) => {
         body: JSON.stringify(data),
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       }
     );
 
     const responseData = await res.json();
-    revalidateTag("userData");
 
     return responseData;
   } catch (error: unknown) {

@@ -26,27 +26,28 @@ const AccountChaptersList = ({
 }) => {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  const mergedChapterData: ChapterData[] | undefined = unrevisedTopics?.reduce(
-    (acc: ChapterData[], curr: TRevisionProps) => {
-      const existingChapter = acc.find((ch) => ch.name === curr.chapter.name);
+  const mergedChapterData: ChapterData[] | undefined = unrevisedTopics.length
+    ? unrevisedTopics?.reduce((acc: ChapterData[], curr: TRevisionProps) => {
+        const existingChapter = acc.find(
+          (ch) => ch?.name === curr?.chapter?.name
+        );
 
-      if (existingChapter) {
-        existingChapter.topics.push(curr.topic);
-      } else {
-        acc.push({
-          name: curr.chapter.name,
-          topics: [curr.topic],
-          studiedAt: curr.chapter.studiedAt,
-          level: curr.chapter.level,
-          overall_efficiency: curr.chapter.overall_efficiency,
-          plannerFrequency: curr.chapter.plannerFrequency,
-        });
-      }
+        if (existingChapter) {
+          existingChapter.topics?.push(curr?.topic);
+        } else {
+          acc.push({
+            name: curr?.chapter?.name,
+            topics: [curr?.topic],
+            studiedAt: curr?.chapter?.studiedAt,
+            level: curr?.chapter?.level,
+            overall_efficiency: curr?.chapter?.overall_efficiency,
+            plannerFrequency: curr?.chapter?.plannerFrequency,
+          });
+        }
 
-      return acc;
-    },
-    []
-  );
+        return acc;
+      }, [])
+    : [];
 
   const handleDeleteChapter = async (data: { chapterName: string }) => {
     setIsDeleting(data.chapterName);
@@ -85,16 +86,16 @@ const AccountChaptersList = ({
         <TableBody>
           {mergedChapterData && mergedChapterData.length ? (
             mergedChapterData?.map((item, index) => (
-              <TableRow key={item.name}>
+              <TableRow key={item?.name}>
                 <TableCell className="text-base lg:text-lg leading-tight flex items-start gap-2">
                   <span>{index + 1}.</span>{" "}
-                  <span>{capitalizeFirstLetter(item.name)}</span>
+                  <span>{capitalizeFirstLetter(item?.name)}</span>
                 </TableCell>
                 <TableCell className="text-center text-base lg:text-lg leading-tight">
-                  {item.topics.length}
+                  {item?.topics.length}
                 </TableCell>
                 <TableCell className="text-center text-base lg:text-lg leading-tight capitalize">
-                  {item.level}
+                  {item?.level}
                 </TableCell>
                 <TableCell className="flex items-center justify-center gap-1 lg:gap-3">
                   {/* <Link
@@ -108,11 +109,10 @@ const AccountChaptersList = ({
                   <Button
                     className="flex items-center justify-center w-7 h-7 lg:w-24 lg:h-8 bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium px-0 lg:px-4"
                     onClick={() =>
-                      handleDeleteChapter({ chapterName: item.name })
+                      handleDeleteChapter({ chapterName: item?.name })
                     }
-                    disabled={isDeleting === item.name}
-                  >
-                    {isDeleting === item.name ? (
+                    disabled={isDeleting === item?.name}>
+                    {isDeleting === item?.name ? (
                       <Loader2 className="w-3 h-3 animate-spin" />
                     ) : (
                       <>

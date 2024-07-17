@@ -1,4 +1,3 @@
-import { revalidateTag } from "next/cache";
 import { getCookie } from "./cookie_actions";
 
 type DataProps = {
@@ -8,9 +7,9 @@ type DataProps = {
 };
 
 export const requestMeeting = async (data: DataProps) => {
-  const token = await getCookie();
-
   try {
+    const token = await getCookie();
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/meeting/request`,
       {
@@ -18,15 +17,13 @@ export const requestMeeting = async (data: DataProps) => {
         body: JSON.stringify(data),
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       }
     );
 
     const responseData = await res.json();
-
-    revalidateTag("meetingData");
 
     return responseData;
   } catch (error: unknown) {
@@ -39,22 +36,18 @@ export const requestMeeting = async (data: DataProps) => {
 };
 
 export const getMeetings = async () => {
-  const token = await getCookie();
-
   try {
+    const token = await getCookie();
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/meeting/get`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
-        cache: "force-cache",
-        next: {
-          tags: ["meetingData"],
-        },
       }
     );
 

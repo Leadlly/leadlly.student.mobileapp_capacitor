@@ -2,8 +2,7 @@
 
 import { getFreeTrialActive } from "@/actions/subscription_actions";
 import { Button } from "@/components/ui/button";
-import { useAppDispatch } from "@/redux/hooks";
-import { userData } from "@/redux/slices/userSlice";
+import { useAuth } from "@/contexts/AuthProviderContext";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -12,7 +11,7 @@ import { toast } from "sonner";
 const ActivateFreeTrialButton = () => {
   const [isActivating, setIsActivating] = useState(false);
 
-  const dispatch = useAppDispatch();
+  const { setUser } = useAuth();
 
   const router = useRouter();
 
@@ -21,7 +20,7 @@ const ActivateFreeTrialButton = () => {
 
     try {
       const res = await getFreeTrialActive();
-      dispatch(userData(res.user));
+      setUser(res.user);
 
       toast.success(res?.message);
 
@@ -37,8 +36,7 @@ const ActivateFreeTrialButton = () => {
       onClick={onClickHandler}
       size="lg"
       className="text-base md:text-lg max-w-64 w-full"
-      disabled={isActivating}
-    >
+      disabled={isActivating}>
       {isActivating ? (
         <span className="flex items-center">
           <Loader2 className="w-5 h-5 animate-spin" />

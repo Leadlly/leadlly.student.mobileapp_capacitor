@@ -5,9 +5,9 @@ export const saveDailyQuiz = async (data: {
   topic: { name: string };
   questions: TQuizAnswerProps[];
 }) => {
-  const token = await getCookie();
-
   try {
+    const token = await getCookie();
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/quiz/save`,
       {
@@ -15,7 +15,7 @@ export const saveDailyQuiz = async (data: {
         body: JSON.stringify(data),
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
       }
@@ -36,19 +36,18 @@ export const saveDailyQuiz = async (data: {
 };
 
 export const getDailyStreakQuestions = async () => {
-  const token = await getCookie();
-
   try {
+    const token = await getCookie();
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_STUDENT_API_BASE_URL}/api/questionbank/streakquestion`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Cookie: `token=${token}`,
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include",
-        cache: "force-cache",
       }
     );
 
